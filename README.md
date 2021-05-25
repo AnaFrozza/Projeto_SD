@@ -1,2 +1,3 @@
-# Projeto_SD
-Desenvolvimento de aplicação distribuída
+# JOGO DA MEMÓRIA
+
+Ver documentação [DOC](docs/documentation.md)
