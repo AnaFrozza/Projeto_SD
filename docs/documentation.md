@@ -7,6 +7,7 @@
 * [Interface](#interface)
     * [Programa Cliente](#programa-cliente)
     * [Programa Servidor](#programa-servidor)
+    * [Funções do Jogo](#funcoes-do-jogo)
 * [Execução](#execucao)
 
 
@@ -29,6 +30,8 @@ Toda a comunicação é realizada através de sockets TCP.
     - Caso seja o primeiro jogador, este aguarda os demais jogadores conectarem.
     - O sistema distribui as cartas na tela voltadas para baixo.
 
+![Inicio da partida](img/etapa1.jpeg)
+
 * **Jogar partida**: 
     - O usuário seleciona a primeira carta e o sistema a exibe na tela.
     - O usuário seleciona a segunda carta e o sistema exibe a mesma na tela.
@@ -38,6 +41,10 @@ Toda a comunicação é realizada através de sockets TCP.
     - Caso as cartas não sejam iguais, as cartas voltam a ficar voltadas para baixo.
     - Quando todos os pares de cartas são encontrados o sistema encerra a partida.
     - Sistema exibe a pontuação.
+    
+![Jogada do jogador 1](img/etapa2.jpeg)
+
+![Jogada do jogador 2](img/etapa3.jpeg)
 
 * **Sair do jogo**: 
     - Usuário solicita sair do jogo.
@@ -48,13 +55,8 @@ Toda a comunicação é realizada através de sockets TCP.
 
 ### Programa Cliente
 
-Ao ser iniciado, o programa cliente irá abrir uma conexão TCP para o servidor. Após aberta a conexão, o programa cliente recebe do servidor um identificador numérico do seu jogador dentro da partida que se iniciará.
+Ao ser iniciado, o programa cliente irá abrir uma conexão TCP com o servidor. Após aberta a conexão, o programa cliente recebe do servidor um identificador numérico do seu jogador dentro da partida que se iniciará.
 
-Uma vez iniciada a partida, o programa cliente recebe informações do servidor e imprimirá os dados do jogo na tela. O servidor envia os seguintes dados:
-   - Atualização do estado do tabuleiro.
-   - Atualização do placar.
-   - Aviso do jogador da vez.
-   - Aviso de que o jogador da vez acertou um par.
 
 dim: Dimensão do tabuleiro para a partida. Controla a dificuldade do jogo. Pode ser qualquer número par menor que 10.
 nJogadores: número de jogadores na partida.
@@ -73,10 +75,10 @@ Placar:
 Jogador 1:  0
 Jogador 2:  0
 
-Digite a linha: 0
+Digite a linha: 0 
 Digite a coluna: 1
 
-a parte superior, é exibido o estado atual do tabuleiro. O caractere '?' indica que a posição correspondente possui uma carta que se encontra virada para baixo. O jogo começa com uma oportunidade para o Jogador 1, que deve especificar as coordenadas de duas cartas do tabuleiro, uma de cada vez. A especificação é feita no formato linha e coluna. Ao selecionar uma carta, o programa exibe o valor na posição correspondente do tabuleiro. Por exemplo, ao especificar as coordenadas "0 1":
+O caractere '?' indica que a posição correspondente possui uma carta que se encontra virada para baixo. O jogo começa com uma oportunidade para o Jogador 1, que deve especificar as coordenadas de duas cartas do tabuleiro, uma de cada vez. A especificação é feita no formato linha e coluna. Ao selecionar uma carta, o programa exibe o valor na posição correspondente do tabuleiro. Por exemplo, ao especificar as coordenadas "0 1":
 
 |   | 0 | 1 | 2 | 3 |
 |---|---|---|---|---|
@@ -91,8 +93,6 @@ Placar:
 Jogador 1:  0
 Jogador 2:  0
 
-Digite a linha: 
-Digite a coluna: 
 
 Ao receber coordenadas, o programa realiza uma série de verificações (por exemplo, se as coordenadas são válidas e se a carta correspondente já não está aberta).
 À medida que os jogadores acertam pares corretos, o programa atualiza o tabuleiro, substituindo o valor numérico das cartas dos pares já encontrados pelo caractere '-'. Antes de cada nova jogada, o estado atualizado do tabuleiro é exibido aos jogadores:
@@ -109,10 +109,6 @@ Placar:
 Jogador 1:  1
 Jogador 2:  0
 
-Digite a linha:
-Digite a coluna:
-
-
 O jogo termina quando não há mais peças fechadas. O vencedor é o jogador que encontrou o maior número de pares corretos. O programa exibe essa informação na tela.
 
 ### Programa Servidor
@@ -121,19 +117,36 @@ Ao ser executado, o programa servidor abre um socket TCP em modo de escuta e agu
 
 Quando o número de jogadores conectados alcança o número especificado de jogadores para a partida, o servidor envia uma mensagem de inicio de jogo para todos os clientes conectados. Tal mensagem contém as informações do estado inicial do tabuleiro e do placar.
 
-Além da mensagem de inicio de jogo, o servidor envia também uma mensagem informando a vez do primeiro jogador. Essa mensagem é enviada a todos os jogadores para que todos saibam de quem é a vez agora.
-Nesse ponto, o servidor aguardar uma resposta do Jogador, contendo sua jogada. 
+Uma vez iniciada a partida, o programa servidor envia as informações ao cliente e imprimi os dados do jogo na tela. 
+O servidor envia os seguintes dados:
+   - Atualização do estado do tabuleiro.
+   - Atualização do placar.
+   - Aviso do jogador da vez.
+   - Aviso de que o jogador da vez acertou um par.
 
-Jogador  0 >>  ('192.168.100.41', 60172)  conectado 
+Nesse ponto, o servidor aguardar uma resposta do Jogador, contendo sua jogada.
 
-Jogador  1 >>  ('192.168.100.134', 37589)  conectado 
-
-Jogador se foi. :(
+### Funções do Jogo
+As funções utilizadas na aplicação do jogo são:
+   - save: Essa função salva os dados do tabuleiro para uma string, para que o tabuleiro possa ser enviado pelos sockets 
+   - restore:  Essa função restaura os dados do tabuleiro a partir de uma string novamente em lista
+   - printTabuleiro:  Essa função imprime o tabuleiro em um formato visual para o cliente
+   - fechaPeca: Essa função fecha a carta na posição (i, j). Se a posição já esta fechada ou se já foi removida, retorna False. Retorna True caso contrário
+   - removePeca: Essa função remove a carta na posicao (i, j). Se a posição já esta removida, retorna False. Retorna True caso contrário
+   - joga: Essa função faz uma jogada no tabuleiro, a partir das posições informadas
+   - validaJogada: Essa função valida se as cartas viradas são iguais, se forem, as cartas são removidas com a função removePeca() e o placar é incrementado com a função incrementaPlacar(), caso contrário as cartas são viradas novamente para baixo com a função fechaPeca()
+   - incrementaPlacar: Essa função adiciona um ponto no placar para o jogador especificado
+   - imprimePlacar: Essa função imprime o placar atual
 
 ## Execução
 A implementação não recebe nenhum argumento. 
 Para executá-la, basta utilizar o seguintes comandos:
+```
+python Servidor.py
+```
+```
+python Cliente.py
 
-##### _python Servidor.py_
-##### _python Cliente.py_ 
-O Cliente em pelo menos dois terminais.
+OBS.: O Cliente em pelo menos dois terminais.
+```
+
